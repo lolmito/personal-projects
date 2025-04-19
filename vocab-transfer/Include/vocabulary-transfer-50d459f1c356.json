@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "vocabulary-transfer",
+  "private_key_id": "50d459f1c3565ba96823cdb0b69c9171828b38a8",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQDe1muk/k5uvA9w\nGft4kdcGKmpaX184SMV6abYYPFLzHe5luMdrwDqN1bIf67gf/UagMGqcbww6gy20\nViMgseSS/C/bIEEKqJymxHoGBoxWLrASQt0wOjp+qEx8U72oPuZQ2iHnk33LirKY\nJ3wFWugR2ZqwN2hJfOkOsdt7AHhCpKz5yMtWfyR+66GYCVJCD/bxwxwFsLgzl6w0\nAgItEBfPI1oigyaa7y90yYoiwhN0gFR0dr1L49RI3IxaEY7+L9F1J6G58bVtHa/x\nvxaYqLXhvlxuqRsykFh6uYPRMoOFLnPzZ/jMGaLQfUe3zHxBZdF1ZDrvw3YdwqnU\nzaUUlkYLAgMBAAECggEABQkha5wXl6cGTkk4BpR9IHWK67nmA/aZB9gltkx+r2HI\nxmGzl/rDF/txSAlios5tbydI8XoM87GNMdsUdiOu/6dVSYVkEuKWj6o2+7XgK/5o\nGjGKoBFgywXwnIqj6Y5qU/9p7rrFh/j9ajTSN6jDP8wEE+FcqPR6q8tXI2NyVEcr\nlfaGNphr0tgmhbwoAWtMe9ViWtNDTD1koBcovnJcNa55pUA6/+NtE0Zfs2m6CH3R\ne2l9D/iCA/B4cknGQtlhY9820RIvRoRTkAlqaEyj19H/OjiPE2vGJ1c2L29yB5vr\nkIiP1tREYvN/T6+Nq6NuMHNJXhzBW6rMfCb3B498sQKBgQD8JT9nrI1Ptqw5w4ob\nSYRRgLWxxrMCIEYVCSviC3emNx7QeIUBMajULQBR1GkB39Yolg7GLlwnRxKQeQST\n1AvJZdy+xcrW6KW1uDLwNQnJzMgKYwQPpzS9TwkbSfw1fGjO/4/YGzJ4+89w3kPT\nVIE2yd8fAIPOqTMSsEIr1bRKQwKBgQDiPnp+Q1TOKvP6FhChslAzVWsSDZ7Kuzcq\ns/LZJ8zg5+6HSpj7Yvp6nntwWSn5hBihi0RyoM1W2Ok0RZ1k2ETVMkcjNPkAnyhG\n6QAPRpKf8hKpIJjk0/u+lhr4O5Cg0q092hEbF4+pMCPayzXM2KbAX43IjIbKIFpT\nC7+lD25MmQKBgQCGM0jw5Az+LUqzH9jktxc+zdNmwEvMSOMkFRKPJ+1RwSqcaFja\nDtU9wInYA8az4a+5QEyyvD/+A7zkuhRuncB8O8PmoZ1ZDtALzPMHmCMSjfS2Wobx\n0dunGmbNaG5dBU8/RRQJQEh3zgZVm2bcFrEDOSSQ+pQsrS9qtfcyH3bqwwKBgHMu\nZcRkWQeBPKbElwELO+N2iEUvo/kIaSSXanp91cNmsLw2ET5ifKzyhFuFOWZrhvKv\naVCGZyPg2JEhI+lUZW644xicfmx/mszHEJ22Sy2c2z05eD1/Yrn7x407Hf2SZFqJ\n642EaEI1XPul2yUH45Uq0I8aZAEBiZqf75iEC555AoGAM/1juxl4XDZM4JS9x8Sq\nPIxhdT8yGex5ip8JIxI0HhLByQEi1YkCQAIVzriC24teJzjKX2MEWMw4VVf3k0WD\nAEnNJhk/Wn8Fp9laDYnNPPntOPa6TcR29JrZDM+beXjAdPVChpU3tUl+in0KtHwa\nxAXn4P2mmL1QHWE1I2jArjI=\n-----END PRIVATE KEY-----\n",
+  "client_email": "sa-1-862@vocabulary-transfer.iam.gserviceaccount.com",
+  "client_id": "109801995992065715103",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/sa-1-862%40vocabulary-transfer.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}
