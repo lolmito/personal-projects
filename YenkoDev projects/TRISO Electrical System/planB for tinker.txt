@@ -1,0 +1,588 @@
+/*#include <ESP8266WiFi.h>  // Include ESP8266 WiFi library
+#include "ThingSpeak.h"
+
+// Wi-Fi credentials
+WiFiClient client;// Initialize Wi-Fi client
+const char* ssid = "PLDTHOMEFIBR";
+const char* password = "0723Denav@yu";
+
+//Thingspeak credentials
+unsigned long channelID = 2699314; // Your channel ID
+const char* writeAPIKey = "8OUGJ0P9QUSINKIF"; // Your Write API Key
+*/
+//MANUAL SWITCHING OF SOURCES
+bool solarActive = true;
+bool hydroActive = false;
+bool gridActive = false;
+
+// Timing variables
+
+//General Variables
+int randomNum = random(0, 100);  // Generate a number between 0 and 99
+float multiplier; //value determined by solar/hydro
+
+//Battery values
+bool BattDecrease = false; //indicates no decrease in battery
+float batteryVoltage = 11.0;
+float batterryRandV = random(1, 5);
+float maxValue = 13.0;
+
+//Solar Values - All variables with random can be changed with regards to data to be shown in teamspeak
+float solarVoltage=12; //initial value for Solar voltage
+float solarCurrent=0; //initial value for Solar current
+float EMMultiplier = 0.5; //battery multiplier for EM mode
+float EMSolarVoltage = 16.5;  //desired value for Solar Voltage in EM Mode
+float EMSolarRandV = random(1, 10); //Random value generator for Solar Voltage in EM mode (before reaching max value)
+float EMSolarRandVMax = random(1, 5); //Random max value generator for Solar Voltage in EM Mode (fluctuates Solar Voltage)
+float EMSolarCurrent = 1; //desired value for Solar Current in EM Mode
+float EMSolarRandC = random(1, 5); //Random value generator for Solar Current in EM mode (before reaching max value)
+float EMSolarRandCMax = random(1, 5); //Random max value generator for Solar Current in EM Mode (fluctuates Solar Current)
+
+float MNMultiplier = 1; //battery multiplier for MN mode
+float MNSolarVoltage = 19.75; //desired value for Solar Voltage in MN Mode
+float MNSolarRandV = random(1, 10); //Random value generator for Solar Voltage in MN mode (before reaching max value)
+float MNSolarRandVMax = random(1, 5);//Random max value generator for Solar Voltage in MN Mode (fluctuates Solar Voltage)
+float MNSolarCurrent = 3; //desired value for Solar Current in MN Mode
+float MNSolarRandC = random(1, 5); //Random value generator for Solar Current in MN mode (before reaching max value)
+float MNSolarRandCMax = random(1, 5); //Random max value generator for Solar Current in MN Mode (fluctuates Solar Current)
+
+float NAMultiplier = 1.5; //battery multiplier for NA mode
+float NASolarVoltage = 20.25; //desired value for Solar Current in NA Mode
+float NASolarRandV = random(1, 5); //Random value generator for Solar Voltage in NA mode (before reaching max value)
+float NASolarRandVMax =random(1, 5);//Random max value generator for Solar Voltage in NA Mode (fluctuates Solar Voltage)
+float NASolarCurrent = 6; //desired value for Solar Current in NA Mode
+float NASolarRandC = random(1, 5); //Random value generator for Solar Current in NA mode (before reaching max value)
+float NASolarRandCMax =random(1, 5);//Random max value generator for Solar Current in NA Mode (fluctuates Solar Current)
+
+float ANSolarVoltage = 0; //desired value for Solar Voltage in AN Mode
+float ANSolarRandV = random(1, 5); //Random value generator for Solar Voltage in AN mode (before reaching max value)
+float ANSolarRandVMax =random(1, 5); //Random max value generator for Solar Voltage in AN Mode (fluctuates Solar Voltage)
+float ANSolarCurrent = 0.5; //desired value for Solar Current in AN Mode
+float ANSolarRandC = random(1, 5);//Random value generator for Solar Current in AN mode (before reaching max value)
+float ANSolarRandCMax =random(1, 5);//Random max value generator for Solar Current in AN Mode (fluctuates Solar Current)
+float solarMultiplier; //for battery
+
+//SOLAR MODES
+bool EM = false; //Early Morning setting of the solar (default)
+bool MN = false; //Morning to Noon setting of the solar
+bool NA = true; //Noon to Afternoon setting of the solar
+bool AN = false; // can be considered as the off/decreasing function of the solar power
+
+//Grid Values
+float gridVoltage = 12; //initial value for Grid voltage (default is 12)
+float gridCurrent = 0; //initial value for Grid current
+bool gridDecrease = false; // decrease current
+float gridRandV = random(1, 5); //Random value generator for grid
+float gridMultiplier = 0.05; //Grid Multiplier to Batt voltage
+
+//Hydro Values
+float hydroVoltage = 0; //initial value for Hydro voltage
+float hydroCurrent = 0; //initial value of Hydro current
+bool hydroDecrease = false; // decrease voltage and current
+float hydroRandV = random(1, 5); //Random value generator for hydro
+float hydroMultiplier = 0.05; //Hydro Multiplier to Batt voltage
+
+//Temperature Values
+float TempValue = 26.5; //initial value for Temperature value
+float desiredTempValue = 30; //desired value for Temperature value
+float randTempValue= random(1, 5); //Random value generator for Temperature
+bool TempDecrease = false; // decrease Temp Value
+
+//PH Values
+float PHValue = 6.3; //initial value for PH value
+float desiredPHValue = 7.5; //desired value for PH value
+float randPHValue= random(1, 5); //Random value generator for PH
+bool PHDecrease = false; // decrease PH Value
+
+
+// Variables for tracking time and sending data
+unsigned long lastSendTime = 0; // last time sent to Thingspeak
+unsigned long lastGeneratedTime = 0; //last generated milliseconds duration
+unsigned long lastIncrementTime = 0; //last time increment/decrement was performed for the values
+const long timeIntervalSensors = 10000; // 15 minutes (milliseconds)  MODIFY THIS VALUE IF YOU WANT TO CHANGE INCREMENT TIME
+const long timeIntervalThingSpeak = 20000; // 30 minute (milliseconds) MODIFY THIS VALUE IF YOU WANT TO CHANGE THINGSPEAK UPLOAD TIME
+
+
+
+void setup() {
+  Serial.begin(9600);
+  randomSeed(123);  // Seed random function with a fluctuating analog value
+  /*
+  Serial.print("Connecting to Wi-Fi");// Connect to Wi-Fi
+  WiFi.begin(ssid, password);
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(1000);
+    Serial.print(".");
+    ThingSpeak.begin(client);
+  }
+  Serial.println("\nConnected to Wi-Fi");
+  */
+}
+/*
+void sendDataToThingSpeak() {
+  Serial.println("Sending data to ThingSpeak...");
+
+  // Example of sending data
+  ThingSpeak.setField(1, TempValue); //Temperature Value
+  ThingSpeak.setField(2, solarVoltage); //Solar power
+  ThingSpeak.setField(3, solarCurrent); //Hydro power
+  ThingSpeak.setField(4, hydroVoltage); //grid power
+  ThingSpeak.setField(5, hydroCurrent); //Battery Voltage
+  ThingSpeak.setField(6, gridCurrent); //Grid Current
+  ThingSpeak.setField(7, batteryVoltage); //Battery Voltage
+  ThingSpeak.setField(8, PHValue); //pH Value
+
+  // Write data to ThingSpeak
+  int response = ThingSpeak.writeFields(channelID, writeAPIKey);
+
+  // Check response
+  if (response == 200) {
+    Serial.println("Data sent successfully.");
+  } else {
+    Serial.println("Failed to send data. Response code: " + String(response));
+  }
+}
+*/
+void activateSolar() {
+    solarActive = true;
+    hydroActive = false;
+    gridActive = false;
+    Serial.println("Solar is now active. Hydro and Grid are deactivated.");
+}
+
+void activateHydro() {
+    solarActive = false;
+    hydroActive = true;
+    gridActive = false;
+    Serial.println("Hydro is now active. Solar and Grid are deactivated.");
+}
+
+void activateGrid() {
+    solarActive = false;
+    hydroActive = false;
+    gridActive = true;
+    Serial.println("Grid is now active. Solar and Hydro are deactivated.");
+}
+
+void deactivate_current_sources(){
+  //currently set to set values to 0
+  Serial.println(F("Max voltage reached. Setting all current sources to 0"));
+  solarCurrent = 0; 
+  hydroCurrent = 0;
+  gridCurrent = 0;
+}
+
+void battery(){
+  //battery is slow to charge
+  Serial.println(F("Generating Battery values......"));
+  float multiplier = solarMultiplier + gridMultiplier + hydroMultiplier;
+  if (BattDecrease == false){
+    if (batteryVoltage < maxValue) {
+      Serial.println(F("Flag Battery"));
+      if(randomNum < 50){
+      float increment = batterryRandV / 100.0;  // Values from 0.01 to 0.05
+      batteryVoltage += increment * multiplier; //multiplier is multiplied with increment and added to current value
+      }
+      else if (randomNum < 30) {
+        Serial.println(F("decrement"));
+        float decrement = batterryRandV / 100.0;  // Values from 0.01 to 0.05
+        batteryVoltage -= decrement;
+      }
+      }
+    else if (batteryVoltage >= maxValue) {
+      Serial.println(F("Max battery voltage reached, will fluctuate values"));
+      float increment = batterryRandV / 100.0;  // Generate a random increment between 0.01 to 0.05
+      if (randomNum < 50){
+        batteryVoltage -= increment; //decrements the value of the voltage by a certain amount 
+      }
+      else if(randomNum >= 50){
+        batteryVoltage += increment * multiplier; //increments the value of the voltage by a certain amount
+      }
+      deactivate_current_sources();
+    }
+  }
+  else if (BattDecrease == true){
+    Serial.println(F("Decrementing battery voltage"));
+      float decrement = batterryRandV / 100.0;  // Values from 0.01 to 0.05
+      batteryVoltage -= decrement;
+  }
+  Serial.println("battery Voltage: "+ String(batteryVoltage) + " V");
+}
+
+
+void solar(){
+  Serial.println(F("Generating Solar values......"));
+  if (EM == true){
+    Serial.println(F("===========Early Morning Mode Solar==========="));
+    if (solarVoltage < EMSolarVoltage) {
+      solarMultiplier = EMMultiplier;
+      Serial.println(F("Increasing Solar voltage"));
+      float increment = EMSolarRandV / 10.0;  // Generate a random increment between 0.1 to 0.5
+      solarVoltage += increment; //multiplier is multiplied with increment and added to current value
+    }
+    else if (solarVoltage >= EMSolarVoltage){
+      Serial.println(F("Max early morning voltage reached, will fluctuate values"));
+      float increment = EMSolarRandVMax / 100.0;  // Generate a random increment between 0.01 to 0.05
+      if (randomNum < 50){
+        solarVoltage -= increment; //decrements the value of the voltage by a certain amount 
+      }
+      else if(randomNum >= 50){
+        solarVoltage += increment; //increments the value of the voltage by a certain amount
+      }
+    }
+    //check current
+    if (solarActive){
+      if (solarCurrent < EMSolarCurrent) { 
+        Serial.println(F("Increasing Solar current"));
+        float increment = EMSolarRandC / 100.0;  // Generate a random increment between 0.01 to 0.05
+        solarCurrent += increment; //multiplier is multiplied with increment and added to current value
+      }
+      else if (solarCurrent >= EMSolarCurrent){
+        Serial.println(F("Max early morning current reached, will fluctuate values"));
+        float increment = EMSolarRandCMax / 100.0;  // Generate a random increment between 0.01 to 0.05
+        if (randomNum < 50){
+          solarCurrent -= increment; //decrements the value of the voltage by a certain amount 
+          }
+        else if(randomNum >= 50){
+          solarCurrent += increment; //increments the value of the voltage by a certain amount
+        }
+      }
+    }
+    else{
+      Serial.println(F("NO SOLAR"));
+      solarCurrent = 0; 
+    }
+
+  }
+  else if (MN == true){
+    Serial.println(F("===========Morning to Noon Mode Solar==========="));
+    solarMultiplier = MNMultiplier;
+    if (solarVoltage < MNSolarVoltage) { 
+      Serial.println("Increasing Solar voltage");
+      float increment = MNSolarRandV / 10.0;  // Generate a random increment between 0.1 to 0.5
+      solarVoltage += increment; //multiplier is multiplied with increment and added to current value
+    }
+    else if (solarVoltage >= MNSolarVoltage){
+      Serial.println(F("Max Morning to Noon voltage reached, will fluctuate values"));
+      float increment = MNSolarRandVMax / 100.0;  // Generate a random increment between 0.01 to 0.05
+      if (randomNum < 50){
+        solarVoltage -= increment; //decrements the value of the voltage by a certain amount 
+      }
+      else if(randomNum >= 50){
+        solarVoltage += increment; //increments the value of the voltage by a certain amount
+      }
+    }
+    // check current
+    if(solarActive){
+      if (solarCurrent < MNSolarCurrent) { 
+        Serial.println(F("Increasing Solar current"));
+        float increment = MNSolarRandC / 10.0;  
+        solarCurrent += increment; //multiplier is multiplied with increment and added to current value
+      }
+      else if (solarCurrent >= MNSolarCurrent){
+        Serial.println(F("Max Morning to Noon current reached, will fluctuate values"));
+        float increment = MNSolarRandCMax / 10.0;  
+        if (randomNum < 50){
+          solarCurrent -= increment; //decrements the value of the voltage by a certain amount 
+        }
+        else if(randomNum >= 50){
+          solarCurrent += increment; //increments the value of the voltage by a certain amount
+        }
+      }
+    }
+    else{
+      Serial.println(F("NO SOLAR"));
+      solarCurrent = 0;  
+    }
+
+  }
+  else if (NA == true){
+    Serial.println(F("===========Noon to Afternoon Mode Solar==========="));
+    solarMultiplier = NAMultiplier; 
+    if (solarVoltage < NASolarVoltage) { 
+      Serial.println("Increasing Solar voltage");
+      float increment = NASolarRandV / 10.0; 
+      solarVoltage += increment;
+    }
+    else if (solarVoltage >= NASolarVoltage){
+      Serial.println(F("Max Noon to Afternoon voltage reached, will fluctuate values"));
+      float increment = NASolarRandVMax / 100.0;  
+      if (randomNum < 50){
+        solarVoltage -= increment; //decrements the value of the voltage by a certain amount 
+      }
+      else if(randomNum >= 50){
+        solarVoltage += increment; //increments the value of the voltage by a certain amount
+      }
+    }
+    // check current
+    if (solarActive){
+      if (solarCurrent < NASolarCurrent) { 
+        Serial.println(F("Increasing Solar current"));
+        float increment = NASolarRandC / 10.0;  
+        solarCurrent += increment; //multiplier is multiplied with increment and added to current value
+      }
+      else if (solarCurrent >= NASolarCurrent){
+        Serial.println(F("Max Noon to Afternoon current reached, will fluctuate values"));
+        float increment = NASolarRandCMax / 10.0;  
+        if (randomNum < 50){
+          solarCurrent -= increment; //decrements the value of the voltage by a certain amount 
+        }
+        else if(randomNum >= 50){
+          solarCurrent += increment; //increments the value of the voltage by a certain amount
+        }
+      }
+    }
+    else{
+      Serial.println(F("NO SOLAR"));
+      solarCurrent = 0;
+    }
+
+  }
+  else if (AN == true){
+    Serial.println(F("===========Afternoon to Night Mode Solar==========="));
+    if (solarVoltage > ANSolarVoltage) { 
+      Serial.println(F("Beyond max Afternoon to Night voltage....Decreasing value...."));
+      float increment = ANSolarRandV / 10.0;  
+      solarVoltage -= increment; //decrements the value of the voltage by a certain amount
+    }
+    else if (solarVoltage >= ANSolarVoltage){
+      Serial.println(F("Max Afternoon to Night voltage reached, will fluctuate values"));
+      float increment = ANSolarRandVMax / 100.0; 
+      if (randomNum < 50){
+        solarVoltage -= increment; //decrements the value of the voltage by a certain amount 
+      }
+      else if(randomNum >= 50){
+        solarVoltage += increment; //increments the value of the voltage by a certain amount
+      }
+      }
+    // check current
+    if (solarActive){
+      if (solarCurrent < ANSolarCurrent) { 
+        Serial.println(F("Decreasing current values"));
+        float increment = ANSolarCurrent / 100.0;  
+        solarCurrent -= increment; //multiplier is multiplied with increment and added to current value
+      }
+      else if (solarCurrent >= ANSolarCurrent){
+        Serial.println(F("Max Afternoon to Night current reached, will fluctuate values"));
+        float increment = ANSolarRandCMax / 100.0;  
+        if (randomNum < 50){
+          solarCurrent -= increment; //decrements the value of the voltage by a certain amount 
+        }
+      }
+    }
+    else{
+      Serial.println(F("NO SOLAR"));
+      solarCurrent = 0;
+    }
+  }
+  Serial.println("Solar Voltage: "+ String(solarVoltage));
+  Serial.println("Solar Current: "+ String(solarCurrent));
+
+}
+
+void hydro(){
+  Serial.println(F("Generating Hydro values......"));
+  Serial.println(F("Battery Value multiplier: 0.5 "));
+  if (hydroDecrease == false){
+    if (hydroVoltage < 12) { 
+      Serial.println(F("Increasing Hydro voltage"));
+      float increment = random(1, 5) / 10.0;  // Generate a random increment between 0.1 to 0.5
+      hydroVoltage += increment; //multiplier is multiplied with increment and added to current value
+    }
+    else {
+      Serial.println(F("Max Hydro voltage reached, will fluctuate values"));
+      float increment = random(1, 5) / 100.0;  // Generate a random increment between 0.01 to 0.05
+      if (randomNum < 50){
+        hydroVoltage -= increment; //decrements the value of the voltage by a certain amount 
+      }
+      else if(randomNum >= 50){
+        hydroVoltage += increment; //increments the value of the voltage by a certain amount
+      }
+    }
+    if(hydroActive){
+      if (hydroCurrent < 0.8) { 
+        Serial.println(F("Increasing Hydro current"));
+        float increment = random(1, 5) / 100.0;  // Generate a random increment between 0.01 to 0.05
+        hydroCurrent += increment; //multiplier is multiplied with increment and added to current value
+        }
+      else{
+        Serial.println(F("Max Hydro current reached, will fluctuate values"));
+        float increment = random(1, 5) / 100.0;  // Generate a random increment between 0.01 to 0.05
+        if (randomNum < 50){
+          hydroCurrent -= increment; //decrements the value of the voltage by a certain amount 
+        }
+      else if(randomNum >= 50){
+        hydroCurrent += increment; //increments the value of the voltage by a certain amount
+        }
+      }
+    }
+    else{
+      Serial.println(F("NO HYDRO"));
+      hydroCurrent = 0; 
+    }
+
+  }
+
+  else{
+    Serial.println(F("Decreasing Max Hydro Current and voltage"));
+    float increment = random(1, 5) / 100.0;  // Generate a random increment between 0.01 to 0.05
+    if (randomNum < 50){
+      hydroCurrent -= increment; //decrements the value of the current by a certain amount
+      hydroVoltage -= increment; //decrements the value of the voltage by a certain amount  
+    }
+    
+  }
+  
+  Serial.println("hydroCurrent: " + String(hydroCurrent) + " A");
+  Serial.println("hydroVoltage: " + String(hydroVoltage) + "V");
+}
+void grid(){
+  Serial.println(F("Generating Grid values......"));
+  if (gridDecrease == false){
+    if(hydroActive){
+      if (gridCurrent < 3) { 
+        Serial.println(F("Increasing Grid current"));
+        float increment = random(1, 5) / 100.0;  // Generate a random increment between 0.1 to 0.5
+        gridCurrent += increment; //multiplier is multiplied with increment and added to current value
+      }
+      else{
+        Serial.println(F("Max Grid Current reached, will fluctuate values"));
+        float increment = random(1, 5) / 100.0;  // Generate a random increment between 0.01 to 0.05
+        if (randomNum < 50){
+          gridCurrent -= increment; //decrements the value of the voltage by a certain amount 
+        }
+        else if(randomNum >= 50){
+          gridCurrent += increment; //increments the value of the voltage by a certain amount
+        }
+      }
+    }
+    else{
+      Serial.println(F("NO GRID"));
+      gridCurrent = 0;
+    }
+  }
+  else{
+    Serial.println(F("Decreasing Grid Current....."));
+    float increment = random(1, 5) / 100.0;  // Generate a random increment between 0.01 to 0.05
+    if (randomNum < 50){
+      gridCurrent -= increment; //decrements the value of the current by a certain amount 
+      }
+  }
+
+  Serial.println("Grid Current Value: " + String(gridCurrent) + " A");
+}
+
+void temperature(){
+  Serial.println(F("Creating temperature Values....."));
+  if (TempDecrease == false){
+    if (TempValue < desiredTempValue) {
+      Serial.println(F("Flag Temperature"));
+      if (randomNum < 50){
+        float increment = randTempValue / 100.0; 
+        TempValue += increment ;
+      }
+      else if (randomNum < 40) {
+        float decrement = randTempValue / 100.0; 
+        TempValue -= decrement;
+      }
+    }
+    else if (TempValue >= desiredTempValue) {
+      Serial.println(F("Desired temperature reached, will fluctuate values"));
+      float increment = randTempValue / 100.0; 
+      if (randomNum < 50){
+        TempValue -= increment; 
+      }
+      else if(randomNum >= 50){
+        TempValue += increment;
+      }
+    }
+  }
+  else if (TempDecrease == true){
+    Serial.println(F("Decrementing Temperature"));
+      float decrement = randTempValue / 100.0;;
+      TempValue -= decrement;
+  }
+  Serial.println("Temperature: "+ String(TempValue) + " C");
+}
+
+void pH(){
+  Serial.println(F("Creating pH Values....."));
+  if (PHDecrease == false){
+    if (PHValue < desiredPHValue) {
+      Serial.println(F("Flag Temperature"));
+      if(randomNum < 50){
+        float increment = randPHValue / 100.0; 
+        PHValue += increment ;
+      }
+      else if (randomNum < 40) {
+      float decrement = randPHValue / 100.0; 
+      PHValue -= decrement;
+      }
+    }
+    else if (PHValue >= desiredPHValue) {
+      Serial.println(F("Desired PH level reached, will fluctuate values"));
+      float increment = randPHValue / 100.0; 
+      if (randomNum < 50){
+        PHValue -= increment;
+      }
+      else if(randomNum >= 50){
+        PHValue += increment;
+      }
+    }
+  }
+  else if (PHDecrease == true){
+    Serial.println(F("Decrementing PH levels"));
+      float decrement = randPHValue / 100.0;;
+      PHValue -= decrement;
+  }
+  Serial.println("PH Level: "+ String(PHValue)+ "");
+}
+
+void loop() {
+  unsigned long currentMillis = millis();
+  Serial.println(F("Time in milliseconds:"));
+  Serial.println(currentMillis);
+  if (currentMillis - lastGeneratedTime >= timeIntervalSensors){
+    Serial.println(F("X minutes in milliseconds has passed....."));
+    lastGeneratedTime = currentMillis;
+    solar();
+    Serial.println(F("=================================================="));
+    hydro();
+    Serial.println(F("=================================================="));
+    grid();
+    Serial.println(F("=================================================="));
+    battery();
+    Serial.println(F("=================================================="));
+    pH();
+    Serial.println(F("=================================================="));
+    temperature();
+    Serial.println(F("=================================================="));
+    Serial.println(F("Time in milliseconds:"));
+  }
+  if (currentMillis - lastSendTime >= timeIntervalThingSpeak){
+    Serial.println(F("X minutes has passed....Sending current data to Thingspeak"));
+    lastSendTime = currentMillis;
+    //Set values to send
+    float solarPower = solarVoltage * solarCurrent;
+    float hydroPower =  hydroVoltage * hydroCurrent;
+    float gridPower = gridCurrent * 12;
+    float batteryPower = batteryVoltage * (solarCurrent + hydroCurrent + gridCurrent);
+    float temperatureValue; //will be set once temp function has been made
+    float pHValue;
+    Serial.println("This is the measured solarPower:" + String(solarPower) + "W");
+    Serial.println("This is the measured hydroPower:" + String(hydroPower) + "W");
+    Serial.println("This is the measured gridPower:" + String(gridPower) + "W");
+    Serial.println("This is the measured batteryPower:" + String(batteryPower) + "W");
+/*    
+    if (WiFi.status() == WL_CONNECTED) {
+          sendDataToThingSpeak();
+        } 
+    else {
+          Serial.println("Wi-Fi disconnected. Reconnecting...");
+          WiFi.begin(ssid, password);
+    }
+*/
+  }
+  
+  delay(3000);
+}

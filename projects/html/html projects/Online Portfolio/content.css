@@ -1,0 +1,50 @@
+.main_content{
+    display: flex;
+    height: 120px;
+    align-items: left;
+    justify-content: left;
+    font:
+      bold calc(1em + 2 * (100vw - 120px) / 100) 'Dancing Script',
+      fantasy;
+    color: #ff0083;
+    text-shadow: #000 2px 2px 0.2rem;
+}
+
+.sub_content{
+    display: flex;
+    height: 120px;
+    align-items: center;
+    justify-content: center;
+    font:
+      bold calc(1em + 2 * (100vw - 120px) / 100) 'Dancing Script',
+      fantasy;
+    color: #ff0083;
+    text-shadow: #000 2px 2px 0.2rem;
+}
+.header{
+    background-color: navy;
+    color: black;
+    font-size:medium;
+    font-family: 'Courier New', Courier, monospace;
+    text-align: left; 
+}
+#list{
+  float: right;
+  display:block;
+  font-size: 10;
+  font-size: large;
+  padding-top: 30px;
+  padding-right: 20px;
+  word-wrap: break-word;
+  word-spacing: 10px;
+}
+
+#logo{
+border-bottom: #000;
+border-top: #000;
+border-left: #000;
+border-right: #000;
+font-size: xxx-large;
+padding-left: 20px;
+font: 1em sans-serif;
+}

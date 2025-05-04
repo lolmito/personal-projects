@@ -1,0 +1,38 @@
+#title{
+    text-align: center;
+    font-size: 5vh;
+    font-family: "Lucida Console", Monaco, monospace;
+    text-shadow: 0 -1px 4px #FFF, 0 -2px 10px rgb(9, 87, 177), 0 -10px 20px #002fff, 0 -18px 40px #F00, -10px 9px 4px rgba(235,28,11,0.45);
+    color: #fd5000da;
+}
+#sub-title{
+    text-align: center;
+    font-size: 4vh;
+    color:#FFF;
+    text-shadow: 0 -1px 4px #FFF, 0 -2px 10px rgb(10, 10, 1), 0 -10px 20px #ff8000, 0 -18px 40px #F00, -10px 9px 4px rgba(235,28,11,0.45);
+}
+#image{
+    border:3px solid #000000;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    width: 50%;
+}
+div#tribute-data {
+    background-color: rgb(0, 0, 0, 0.418);
+    box-shadow: 20px 20px 20px #0051ff57;
+    font-family: Georgia;
+    padding: 25px 25px;
+    margin: 11px;
+    margin-top: 50px;
+}
+
+div#tribute-quote {
+    width: 100%;
+    background-color: rgba(0, 0, 0, 0.418);
+    box-shadow: 20px 20px 20px #fdcf006e;
+    margin: 11px;
+    text-align:justify;
+    margin-top: 100px;
+    padding-left: 20px;
+}

@@ -1,0 +1,14 @@
+    def convert(self, s, numRows):
+        """
+        :type s: str
+        :type numRows: int
+        :rtype: str
+        """
+        letter_list=[]
+        temp = []
+
+        for i in range(0,numRows):
+            letter_list += s[i]
+        start = numRows
+        end = start + numRows
+        print(letter_list)
