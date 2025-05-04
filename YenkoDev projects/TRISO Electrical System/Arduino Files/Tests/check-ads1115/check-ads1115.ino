@@ -18,13 +18,13 @@ void setup() {
 
 void loop() {
   // Read analog input from A0 of the ADS1115
-  int16_t adcValue = ads.readADC_SingleEnded(0);  // Reads from A0
+  int16_t adcValue = ads.readADC_SingleEnded(3);  // Reads from A0
   
   // Convert the ADC value to voltage (ADS1115 default gain is +/- 6.144V)
   float voltage = adcValue * 0.1875 / 1000.0;  // 0.1875mV per bit
 
   // Print the voltage to the Serial Monitor
-  Serial.print("Voltage on A0: ");
+  Serial.print("Voltage on A3: ");
   Serial.print(voltage, 6);  // Print with 6 decimal places
   Serial.println(" V");
 

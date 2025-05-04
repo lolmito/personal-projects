@@ -8,7 +8,7 @@ float vIn;                                // measured voltage (3.3V = max. 16.5V
 float vOut;
 float voltageSensorVal;                   // value on pin A3 (0 - 1023)
 const float factor = 5.128;               // reduction factor of the Voltage Sensor shield
-const float vCC = 5.00;                   // Arduino input voltage (measurable by voltmeter)
+const float vCC = 3.00;                   // Arduino input voltage (measurable by voltmeter)
 
 void setup() {
   Serial.begin(9600);
@@ -25,7 +25,7 @@ void setup() {
 }
 
 void loop() {
-  int16_t adc3 = ads.readADC_SingleEnded(0);
+  int16_t adc3 = ads.readADC_SingleEnded(3);
   float voltageSensorVal = adc3 * 0.1875 / 1000.0;  // read the current sensor value (0 - 1023) 
   Serial.println(adc3);
   Serial.println(voltageSensorVal);  

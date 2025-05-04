@@ -1,74 +1,52 @@
-// Pin definitions for relays
-#define HYDRO_PIN 2     // GPIO 2 - Hydro relay
-#define SOLAR_PIN 15    // GPIO 15 - Solar relay
-#define GRID_PIN 0      // GPIO 0 - Grid relay
+// Pin definitions
+//const int voltagePin = A0;  // Analog pin where the voltage sensor module is connected
+#define RELAY_PIN 2     // Digital pin where the relay is connected (D4)
 
 // Constants
-const float voltageThreshold = 11.0;  // Voltage threshold to control the relay
-const float sensorMaxVoltage = 12.0;  // Max voltage sensor can measure
+//const float voltageThreshold = 11.0;  // Voltage threshold to control the relay
+//const float sensorMaxVoltage = 12.0;  // Maximum input voltage the sensor module can measure
+const float referenceVoltage = 5.0;   // Arduino reference voltage (typically 5V for 5V boards)
+//const int analogResolution = 1023;    // Analog resolution for 10-bit ADC (0-1023)
 
 void setup() {
   // Initialize serial communication for debugging
   Serial.begin(9600);
   
-  // Initialize all relay pins as OUTPUT and turn them off (LOW)
-  pinMode(HYDRO_PIN, OUTPUT);
-  pinMode(SOLAR_PIN, OUTPUT);
-  pinMode(GRID_PIN, OUTPUT);
-  resetRelays();
-  Serial.println("Relays Initialized");
-}
-
-void resetRelays() {
-  // Set all relays to LOW (turn off)
-  digitalWrite(HYDRO_PIN, HIGH);
-  digitalWrite(SOLAR_PIN, HIGH);
-  digitalWrite(GRID_PIN, HIGH);
-  Serial.println("All relays reset to LOW");
-}
-
-void changeRelayTo(const char* source) {
-  Serial.print("Changing relay to: ");
-  Serial.println(source);
-  resetRelays();  // Reset all relays before switching
-
-  // Activate the selected relay
-  if (strcmp(source, "Solar") == 0) {
-    digitalWrite(SOLAR_PIN, LOW); // Turn on solar relay
-    Serial.println("Solar relay activated");
-  } else if (strcmp(source, "Hydro") == 0) {
-    digitalWrite(HYDRO_PIN, LOW); // Turn on hydro relay
-    Serial.println("Hydro relay activated");
-  } else if (strcmp(source, "Grid") == 0) {
-    digitalWrite(GRID_PIN, LOW);  // Turn on grid relay
-    Serial.println("Grid relay activated");
-  }
+  // Set the relay pin as output
+  pinMode(RELAY_PIN, OUTPUT);
+  digitalWrite(RELAY_PIN, LOW);  // Ensure the relay is initially off
 }
 
 void loop() {
-  // Simulated voltage readings
-  int randNumberSolarVoltage = random(0, 13);  // 0 to 12V
-  int randNumberHydroVoltage = random(0, 13);  // 0 to 12V
+  // Read the analog input from the voltage sensor module
+  //int sensorValue = analogRead(voltagePin);
   
-  // Print simulated voltages
-  Serial.print("Solar Voltage: ");
-  Serial.println(randNumberSolarVoltage);
-  
-  Serial.print("Hydro Voltage: ");
-  Serial.println(randNumberHydroVoltage);
+  // Map the sensor output (0-5V) to the actual voltage the module is sensing (e.g., 0-25V)
+  //float measuredVoltage = (sensorValue * sensorMaxVoltage) / analogResolution;
 
-  // Decision-making based on voltage values
-  if (randNumberHydroVoltage < voltageThreshold && randNumberSolarVoltage < voltageThreshold) {
-    changeRelayTo("Grid");  // Both are below threshold, use Grid
-  } else if (randNumberSolarVoltage >= voltageThreshold && randNumberHydroVoltage >= voltageThreshold) {
-    // Both are within range, choose the one with the higher voltage
-    changeRelayTo((randNumberSolarVoltage >= randNumberHydroVoltage) ? "Solar" : "Hydro");
-  } else if (randNumberSolarVoltage >= voltageThreshold) {
-    changeRelayTo("Solar");  // Solar is within range, hydro is not
-  } else if (randNumberHydroVoltage >= voltageThreshold) {
-    changeRelayTo("Hydro");  // Hydro is within range, solar is not
+  // Print the measured voltage for debugging
+  //Serial.print("Measured Voltage: ");
+  //Serial.println(measuredVoltage);
+  int measuredVoltage = 10;
+  int randNumber=random(0, 20);
+  Serial.println(randNumber);
+
+  // Control the relay based on the voltage threshold
+  if (measuredVoltage <= voltageThreshold) { //If less than threshold, then normally open
+    // Turn off the relay if the voltage is below the threshold
+    digitalWrite(RELAY_PIN, LOW); //Right is normally closed, left is normally opened
+    Serial.println("Relay ON");
+  } 
+  if (voltageThreshold < measuredVoltage && measuredVoltage < sensorMaxVoltage)) {
+    
+
   }
-
+  else{
+    // Turn on the relay if the voltage is above the threshold
+    digitalWrite(RELAY_PIN, HIGH);
+    Serial.println("Relay OFF");
+  }
+  
   // Small delay before next measurement
-  delay(5000);
+  delay(2000);
 }
